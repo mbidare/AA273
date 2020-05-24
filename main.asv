@@ -51,7 +51,6 @@ for i = 2:numSteps
 end
 
 %% Measurent Noise Generation
-% If y has smaller dimension than x, then need to redo this a little
 Rgauss = 0.1*eye(6);
 Qbi1 = diag([0,0.075,0,0.025,0,0.001]);
 Qbi2 = diag([0,0.025,0,0.1,0,0.001]);
@@ -72,27 +71,25 @@ yBiMod = yNoNoise;
 H = eye(6);
 
 for i = 1:numSteps
-    yNoNoise(:,i) = meas_model(H,xNoNoise(:,i));
-    yGaussian(:,i) = meas_model(H,xGaussian(:,i)) + gaussNoise(:,i);
-    yUniform(:,i) = meas_model(H,xUniform(:,i))+ uniformNoise(:,i);
-    yExp(:,i) = meas_model(H,xExp(:,i)) + expNoise(:,i); 
-    yBrn(:,i) = meas_model(H,xBrn(:,i)) + brnNoise(:,i);
-    yCauchy(:,i) = meas_model(H,xCauchy(:,i)) + cauchNoise(:,i); 
-    yBiMod(:,i) = meas_model(H,xBiMod(:,i)) + biModalNoise(:,i);
+    yNoNoise(:,i) = H*xNoNoise(:,i);
+    yGaussian(:,i) = H*xGaussian(:,i) + gaussNoise(:,i);
+    yUniform(:,i) = H*xUniform(:,i) + uniformNoise(:,i);
+    yExp(:,i) = H*xExp(:,i) + expNoise(:,i); 
+    yBrn(:,i) = H*xBrn(:,i) + brnNoise(:,i);
+    yCauchy(:,i) = H*xCauchy(:,i) + cauchNoise(:,i); 
+    yBiMod(:,i) = H*xBiMod(:,i) + biModalNoise(:,i);
 end
 
 %% Add filter stuff
 Cmean = [0;0;0;0;0;0]; % Default: Gauss, Uniform, Cauchy, Bimodal
 %Cmean = [0.002;0.002;0.002;0.002;0.0004;0.0004]; % Exp
 %Cmean = mubi; % Bimodal
+
 Q = Qgauss; % Default: Gauss
 R = Rgauss; % Default: Gauss
 
-% [mu,sigma] = kalmanFilter(yGaussian,u,A,B,H,Q,R,Cmean,dt);
-% plotting(mu,xGaussian,'Kalman Filter');
-
-[mu,sigma] = ExtendedkalmanFilter(yGaussian,u,A,B,H,Q,R,dt);
-plotting(mu,xGaussian,'Extended Kalman Filter');
+[mu,sigma] = kalmanFilter(yGaussian,u,A,B,H,Q,R,Cmean,dt);
+plot()
 
 %% Plot Trajectories
 figure
