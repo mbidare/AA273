@@ -94,6 +94,11 @@ R = Rgauss; % Default: Gauss
 [mu,sigma] = ExtendedkalmanFilter(yGaussian,u,A,B,H,Q,R,dt);
 plotting(mu,xGaussian,'Extended Kalman Filter');
 
+numParticles = 1e3;
+dim = 6;
+[muPF] = particleFilter(yGaussian,u,numParticles,dim,Q,R,dt,A,B,C);
+plotting(muPF,xGaussian,'Particle Filter');
+
 %% Plot Trajectories
 figure
 plot3(xNoNoise(1,:),xNoNoise(3,:),xNoNoise(5,:),'DisplayName','No Noise')
