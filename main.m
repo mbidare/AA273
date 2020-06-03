@@ -94,9 +94,12 @@ R = Rgauss; % Default: Gauss
 [mu,sigma] = ExtendedkalmanFilter(yGaussian,u,A,B,H,Q,R,dt);
 plotting(mu,xGaussian,'Extended Kalman Filter');
 
+[mu,sigma] = UnscentedkalmanFilter(yGaussian,u,A,B,H,Q,R,dt);
+plotting(mu,xGaussian,'Unscented Kalman Filter');
+
 numParticles = 1e3;
 dim = 6;
-[muPF] = particleFilter(yGaussian,u,numParticles,dim,Q,R,dt,A,B,C);
+[muPF] = particleFilterCustom(yGaussian,u,numParticles,dim,Q,R,dt,A,B,C);
 plotting(muPF,xGaussian,'Particle Filter');
 
 %% Plot Trajectories

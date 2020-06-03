@@ -1,85 +1,95 @@
-function [mu,sigma]= UnscentedkalmanFilter(f, g, y, u, n,lambda, Q, R)
-
+function [mu,sigma]= UnscentedkalmanFilter(y, u, A, B, C, Q, R,dt)
+ 
+lambda = 2;
+ 
 num = length(y(1,:));
-dim = n;
-
+dim = size(A,1);
+ 
 mu = zeros(dim,num);
 sigma = zeros(dim,dim,num);
-
-weights = generate_weights(n, lambda);
+sigma(:,:,1) = .1*eye(dim);
+ 
 for i = 2:num
     
-    prediction = predict(f,mu(:,i-1), u(:,i-1), sigma(:,:,i-1), n, lambda);
-    [mu(:,i),sigma(:,:,i)] = update(g, prediction, y(i), n, lambda, weights, Q, R);
+    [pred_mean, pred_cov] =  predict(A, B, mu(:,i-1), u(:,i-1), sigma(:,:,i-1), dim, lambda, Q, dt);
+    [mu(:,i),sigma(:,:,i)] = update (C, pred_mean, pred_cov, y(:,i), dim, lambda, Q, R);
     
 end
 end
-
+ 
 function sigpoints = computeSigmaPoints(mu,sigma, n, lambda)
-
+% This function computes the sigma points used by the unscented kalman
+% filter
 half_sigma = sqrtm((lambda+n)*sigma);
-
-sigpoints = zeros(3,2*n+1);
+ 
+sigpoints = zeros(n,2*n+1);
 sigpoints(:,1) = mu;
 for j=2:n+1
     sigpoints(:,j) = mu + half_sigma(:,j-1);
     sigpoints(:,n+j) = mu - half_sigma(:,j-1);
 end
 end
-
+ 
 function weights = generate_weights(n, lambda)
 % generate weights for finding sigma points
 weights = ones(1,2*n+1);
 weights(1) = lambda/(n+lambda);
 weights(2:end) = 1/(2*(lambda+n));
 end
-
-function prediction = predict(f,mu, u, sigma, n, lambda)
-
+ 
+function [pred_mean, pred_cov] = predict(A, B, mu, u, sigma, n, lambda, Q, dt)
 sigpoints = computeSigmaPoints(mu,sigma, n, lambda);
-
-prediction = zeros(3,2*n+1);
+prediction = zeros(n,2*n+1);
 for j=1:2*n+1
-    prediction(:,j) = f(sigpoints(:,j), u(:,j));
+    prediction(:,j) = act_dyn(sigpoints(:,j), u, dt, A, B);
 end
-end
-
-function [mu,sigma] = update(g, prediction, y, n, lambda, weights, Q, R)
-
+ 
+weights = generate_weights(n, lambda);
+ 
 % mean %
-mu_bar = prediction*weights';
-
+pred_mean = prediction*weights';
+ 
 % cov %
-cov_bar = Q;
+pred_cov = Q;
 for j=1:2*n+1
-    temp = (prediction(:,j)-mu_bar);
-    cov_bar = cov_bar + weights(j)*(temp*temp');
+    temp = (prediction(:,j)-pred_mean);
+    pred_cov = pred_cov + weights(j)*(temp*temp');
 end
-
-updated_sigpoints = computeSigmaPoints(mu_bar,cov_bar, n, lambda);
-
-sig_measure = zeros(1,2*n+1);
+ 
+ 
+end
+ 
+function [mu,sigma] = update(C, pred_mean, pred_cov, y, n, lambda, Q, R)
+% This function updates the unscented kalman prediction of the robot's
+% position
+ 
+weights = generate_weights(n, lambda);
+ 
+updated_sigpoints = computeSigmaPoints(pred_mean,pred_cov, n, lambda);
+ 
+sig_measure = zeros(n,2*n+1);
 for j=1:2*n+1
-    sig_measure(j) = g(updated_sigpoints(:,j));
+    sig_measure(:,j) = meas_model(C,updated_sigpoints(:,j));
 end
-
+ 
 y_mean = sig_measure*weights';
-
+ 
 % cov Y %
 cov_y = R;
 for j=1:2*n+1
-    temp = (sig_measure(j)-y_mean);
+    temp = (sig_measure(:,j)-y_mean);
     cov_y = cov_y + weights(j)*(temp*temp');
 end
-
+ 
 % cov XY %
-cov_xy = zeros(3,1);
+cov_xy = zeros(length(pred_mean),length(y_mean));
 for j=1:2*n+1
-    temp = (updated_sigpoints(:,j) - mu_bar)*(sig_measure(j)-y_mean)';
+    temp = (updated_sigpoints(:,j) - pred_mean)*(sig_measure(:,j)-y_mean)';
     cov_xy = cov_xy + weights(j)*temp;
 end
-
+ 
 % update %
-mu = mu_bar + cov_xy*inv(cov_y)*(y - y_mean);
-sigma = cov_bar - cov_xy*inv(cov_y)*(cov_xy');
+mu = pred_mean + cov_xy*inv(cov_y)*(y - y_mean);
+sigma = pred_cov - cov_xy*inv(cov_y)*(cov_xy');
 end
+
