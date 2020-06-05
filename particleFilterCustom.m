@@ -1,4 +1,4 @@
-function [muPF] = particleFilter(y,u,numParticles,dim,Q,R,dt,A,B,C)
+function [muPF] = particleFilterCustom(y,u,numParticles,dim,Q,R,dt,A,B,C)
 num = length(y);
 particles = zeros(dim,numParticles,num);
 muPF = zeros(dim,num);
@@ -35,4 +35,3 @@ for i = 2:num
 end
 close(wb)
 end
-
