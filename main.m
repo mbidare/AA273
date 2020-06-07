@@ -28,8 +28,6 @@ load('noise')
 %% True (noisy) Trajectories 
 % Using double integrator \ddot{x} = u/mass
 % State X = [x;xdot,y,ydot,z,zdot]
-%A = zeros(6,6); A(1,1) = 1; A(3,3) = 1; A(5,5) = 1; A(5,6) = dt; A(6,6)=1;
-% B = zeros(6,3); B(2,1) = 1/mass; B(4,2) = 1/mass; B(6,3) = 1/mass;
 C = zeros(3,6); C(1,1) = 1; C(2,3) = 1; C(3,5) = 1;
 
 xNoNoise = zeros(6,numSteps); xNoNoise(:,1) = x0;
