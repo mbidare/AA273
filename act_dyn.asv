@@ -1,0 +1,12 @@
+% Actual Dynamics of state of system (non-linear)
+% State X = [x;xdot,y,ydot,z,zdot]
+function x_next = act_dyn(x,u,dt)
+    mass = 1;
+    V = 1;  % linear velocity in xy plane;
+    x_next = zeros(6,1);
+    x_next(1) = x(1) + dt*(V*cos(theta));
+    x_next(2) = x(2) + dt*(u(1)/mass);
+    x_next(3) = x(3) + dt*(V*sin(theta));
+    x_next(4) = x(4) + dt*(u(2)/mass);
+    x_next(5) 
+end

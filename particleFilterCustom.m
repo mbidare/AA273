@@ -1,4 +1,4 @@
-function [muPF] = particleFilterCustom(y,u,numParticles,dim,Q,R,dt,A,B,C)
+function [muPF] = particleFilterCustom(y,u,numParticles,dim,Q,R,dt,C)
 num = length(y);
 particles = zeros(dim,numParticles,num);
 muPF = zeros(dim,num);
@@ -9,7 +9,7 @@ for i = 2:num
     xPred = zeros(dim,numParticles);
     wp = mvnrnd(zeros(dim,1),Q,numParticles)';
     for j = 1:numParticles
-       xPred(:,j) = act_dyn(particles(:,j,i-1),u(:,i-1),dt,A,B) + wp(:,j);
+       xPred(:,j) = act_dyn(particles(:,j,i-1),u(:,i-1),j-1,dt) + wp(:,j);
     end
    wBar = zeros(1,numParticles);
    dimR = size(R,1);

@@ -9,12 +9,11 @@ clc
 t0 = 0; tf = 300; dt = 0.1;
 tVec = t0:dt:tf;
 x0 = zeros(6,1);
-mass = 1;
 
 %% Control inputs 
 % At the moment its assumed that u = 0 is hover
 numSteps = size(tVec,2);
-u = [sin(0.05*tVec);cos(0.05*tVec);0.02*ones(1,numSteps)];
+u = [0.04*ones(1,numSteps);sin(0.05*tVec);0.02*ones(1,numSteps)];
 
 %% Process Noise Generation
 Qgauss = diag([0,0.1,0,0.1,0,0.001]);
@@ -29,8 +28,8 @@ load('noise')
 %% True (noisy) Trajectories 
 % Using double integrator \ddot{x} = u/mass
 % State X = [x;xdot,y,ydot,z,zdot]
-A = zeros(6,6); A(1,2) = 1; A(3,4) = 1; A(5,6) = 1;
-B = zeros(6,3); B(2,1) = 1/mass; B(4,2) = 1/mass; B(6,3) = 1/mass;
+%A = zeros(6,6); A(1,1) = 1; A(3,3) = 1; A(5,5) = 1; A(5,6) = dt; A(6,6)=1;
+% B = zeros(6,3); B(2,1) = 1/mass; B(4,2) = 1/mass; B(6,3) = 1/mass;
 C = zeros(3,6); C(1,1) = 1; C(2,3) = 1; C(3,5) = 1;
 
 xNoNoise = zeros(6,numSteps); xNoNoise(:,1) = x0;
@@ -41,13 +40,13 @@ xBrn = xNoNoise;
 xCauchy = xNoNoise;
 xBiMod = xNoNoise;
 for i = 2:numSteps
-    xNoNoise(:,i) = act_dyn(xNoNoise(:,i-1),u(:,i-1), dt, A, B);
-    xGaussian(:,i) = act_dyn(xGaussian(:,i-1),u(:,i-1), dt, A, B) + gaussNoise(:,i); 
-    xUniform(:,i) = act_dyn(xUniform(:,i-1),u(:,i-1), dt, A, B) + uniformNoise(:,i); 
-    xExp(:,i) = act_dyn(xExp(:,i-1),u(:,i-1), dt, A, B) + expNoise(:,i); 
-    xBrn(:,i) = act_dyn(xBrn(:,i-1),u(:,i-1), dt, A, B) + brnNoise(:,i); 
-    xCauchy(:,i) = act_dyn(xCauchy(:,i-1),u(:,i-1), dt, A, B) + cauchNoise(:,i); 
-    xBiMod(:,i) = act_dyn(xBiMod(:,i-1),u(:,i-1), dt, A, B) + biModalNoise(:,i); 
+    xNoNoise(:,i) = act_dyn(xNoNoise(:,i-1),u(:,i-1),i-1, dt);
+    xGaussian(:,i) = act_dyn(xGaussian(:,i-1),u(:,i-1),i-1, dt) + gaussNoise(:,i); 
+    xUniform(:,i) = act_dyn(xUniform(:,i-1),u(:,i-1), i-1,dt) + uniformNoise(:,i); 
+    xExp(:,i) = act_dyn(xExp(:,i-1),u(:,i-1),i-1, dt) + expNoise(:,i); 
+    xBrn(:,i) = act_dyn(xBrn(:,i-1),u(:,i-1), i-1,dt) + brnNoise(:,i); 
+    xCauchy(:,i) = act_dyn(xCauchy(:,i-1),u(:,i-1),i-1, dt) + cauchNoise(:,i); 
+    xBiMod(:,i) = act_dyn(xBiMod(:,i-1),u(:,i-1), i-1,dt) + biModalNoise(:,i); 
 end
 
 %% Measurent Noise Generation
@@ -91,15 +90,15 @@ R = Rgauss; % Default: Gauss
 % [mu,sigma] = kalmanFilter(yGaussian,u,A,B,H,Q,R,Cmean,dt);
 % plotting(mu,xGaussian,'Kalman Filter');
 
-[mu,sigma] = ExtendedkalmanFilter(yGaussian,u,A,B,H,Q,R,dt);
+[mu,sigma] = ExtendedkalmanFilter(yGaussian,u,H,Q,R,dt);
 plotting(mu,xGaussian,'Extended Kalman Filter');
 
-[mu,sigma] = UnscentedkalmanFilter(yGaussian,u,A,B,H,Q,R,dt);
+[mu,sigma] = UnscentedkalmanFilter(yGaussian,u,H,Q,R,dt);
 plotting(mu,xGaussian,'Unscented Kalman Filter');
 
 numParticles = 1e3;
 dim = 6;
-[muPF] = particleFilterCustom(yGaussian,u,numParticles,dim,Q,R,dt,A,B,C);
+[muPF] = particleFilterCustom(yGaussian,u,numParticles,dim,Q,R,dt,C);
 plotting(muPF,xGaussian,'Particle Filter');
 
 %% Plot Trajectories
