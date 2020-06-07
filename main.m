@@ -14,7 +14,24 @@ x0 = zeros(6,1);
 % At the moment its assumed that u = 0 is hover
 numSteps = size(tVec,2);
 u = [0.04*ones(1,numSteps);sin(0.05*tVec);0.02*ones(1,numSteps)];
-
+u_agressive = zeros(3,numSteps);
+i = 1;
+for t = tVec
+    if t<=1/6*tf
+    elseif t>1/6*tf && t<2/6*tf
+        u_agressive(:,i) = [4*sin(0.05*t);3*cos(0.05*t);0.02];
+    elseif t>2/6*tf && t<3/6*tf
+        u_agressive(:,i) = [2*sin(0.05*t);2*cos(0.05*t);0.02];
+    elseif t>3/6*tf && t<4/6*tf
+        u_agressive(:,i) = [-2*cos(0.05*t);-2*sin(0.05*t);0.02];
+    elseif t>4/6*tf && t<5/6*tf
+        u_agressive(:,i) = [cos(0.05*t);4*sin(0.05*t);0.02];
+    else
+        u_agressive(:,i) = [4*sin(0.05*t);-9*cos(0.05*t);0.02];
+    end
+    i = i +1;
+end
+u = u_agressive
 %% Process Noise Generation
 Qgauss = diag([0,0.1,0,0.1,0,0.001]);
 Qbi1 = diag([0,0.075,0,0.025,0,0.001]);
