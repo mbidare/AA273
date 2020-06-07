@@ -1,6 +1,7 @@
 %% AA 273 Project
 % Code to generate different types of noise and use different types of
 % filters to estimate true trajectory measurements.
+% MILAN runs Agressive. Gaddy runs non-aggressive. 
 
 clear
 clc
@@ -31,21 +32,18 @@ for t = tVec
     end
     i = i +1;
 end
-u = u_agressive
+u = u_agressive;
 %% Process Noise Generation
 Qgauss = diag([0,0.1,0,0.1,0,0.001]);
 Qbi1 = diag([0,0.075,0,0.025,0,0.001]);
 Qbi2 = diag([0,0.025,0,0.1,0,0.001]);
 mubi = [0;-0.5;0;-0.5;0;-0.05];
 
-new_noise = 1; % 1 to generate new noise. 0 to load same noise as prev run
+new_noise = 0; % 1 to generate new noise. 0 to load same noise as prev run
 generate_noise(Qgauss,Qbi1,Qbi2,mubi,numSteps,new_noise); 
 load('noise')
 
 %% True (noisy) Trajectories 
-% Using double integrator \ddot{x} = u/mass
-% State X = [x;xdot,y,ydot,z,zdot]
-C = zeros(3,6); C(1,1) = 1; C(2,3) = 1; C(3,5) = 1;
 
 xNoNoise = zeros(6,numSteps); xNoNoise(:,1) = x0;
 xGaussian = xNoNoise;
@@ -65,12 +63,12 @@ for i = 2:numSteps
 end
 
 %% Measurent Noise Generation
-% If y has smaller dimension than x, then need to redo this a little
+H = eye(6);
 Rgauss = 0.1*eye(6);
 Qbi1 = diag([0,0.075,0,0.025,0,0.001]);
 Qbi2 = diag([0,0.025,0,0.1,0,0.001]);
 mubi = [0;-0.5;0;-0.5;0;-0.05];
-new_noise = 1; % 1 to generate new noise. 0 to load process noise
+new_noise = 0; % 1 to generate new noise. 0 to load process noise
 generate_noise(Qgauss,Qbi1,Qbi2,mu,numSteps,new_noise);
 
 %% Generate measurements. Use measurement model defined in Estimation
@@ -82,8 +80,6 @@ yExp = yNoNoise;
 yBrn = yNoNoise;
 yCauchy = yNoNoise;
 yBiMod = yNoNoise;
-
-H = eye(6);
 
 for i = 1:numSteps
     yNoNoise(:,i) = meas_model(H,xNoNoise(:,i));
@@ -111,10 +107,10 @@ plotting(mu,xGaussian,'Extended Kalman Filter');
 [mu,sigma] = UnscentedkalmanFilter(yGaussian,u,H,Q,R,dt);
 plotting(mu,xGaussian,'Unscented Kalman Filter');
 
-numParticles = 1e3;
+numParticles = 1e4;
 dim = 6;
-[muPF] = particleFilterCustom(yGaussian,u,numParticles,dim,Q,R,dt,C);
-plotting(muPF,xGaussian,'Particle Filter');
+[muPF] = particleFilterCustom(yGaussian,u,numParticles,dim,Q,R,dt,H);
+plotting(mu,xGaussian,'Particle Filter');
 
 %% Plot Trajectories
 figure
