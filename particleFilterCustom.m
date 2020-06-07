@@ -16,7 +16,7 @@ for i = 2:num
    eta = 1/sqrt((2*pi)^dimR*det(R));
    vp = mvnrnd([0;0;0;0;0;0],R,numParticles)';
    for j = 1:numParticles
-       gVal = meas_model(C,particles(:,j,i-1)) ; %+ vp(:,j); %g(particles(:,j,i-1)) + vp(:,j);
+       gVal = meas_model(C,particles(:,j,i-1)) ;
        wBar(j) = eta*exp(-0.5*(y(:,i)-gVal)'*R^(-1)*(y(:,i)-gVal));
    end
    w = wBar./(sum(wBar));

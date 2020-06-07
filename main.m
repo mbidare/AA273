@@ -98,19 +98,19 @@ Cmean = [0;0;0;0;0;0]; % Default: Gauss, Uniform, Cauchy, Bimodal
 Q = Qgauss; % Default: Gauss
 R = Rgauss; % Default: Gauss
 
-% [mu,sigma] = kalmanFilter(yGaussian,u,A,B,H,Q,R,Cmean,dt);
-% plotting(mu,xGaussian,'Kalman Filter');
+[KFmu,~] = kalmanFilter(yGaussian,u,A,B,H,Q,R,Cmean,dt);
+plotting(KFmu,xGaussian,'Kalman Filter');
 
-[mu,sigma] = ExtendedkalmanFilter(yGaussian,u,H,Q,R,dt);
-plotting(mu,xGaussian,'Extended Kalman Filter');
+[EKFmu,~] = ExtendedkalmanFilter(yGaussian,u,H,Q,R,dt);
+plotting(EKFmu,xGaussian,'Extended Kalman Filter');
 
-[mu,sigma] = UnscentedkalmanFilter(yGaussian,u,H,Q,R,dt);
-plotting(mu,xGaussian,'Unscented Kalman Filter');
+[UKFmu,~] = UnscentedkalmanFilter(yGaussian,u,H,Q,R,dt);
+plotting(UKFmu,xGaussian,'Unscented Kalman Filter');
 
-numParticles = 1e4;
+numParticles = 1e3;
 dim = 6;
 [muPF] = particleFilterCustom(yGaussian,u,numParticles,dim,Q,R,dt,H);
-plotting(mu,xGaussian,'Particle Filter');
+plotting(muPF,xGaussian,'Particle Filter');
 
 %% Plot Trajectories
 figure
