@@ -98,33 +98,34 @@ Cmean = [0;0;0;0;0;0]; % Default: Gauss, Uniform, Cauchy, Bimodal
 Q = Qgauss; % Default: Gauss
 R = Rgauss; % Default: Gauss
 
-[KFmu,~] = kalmanFilter(yBiMod,u,H,Q,R,Cmean,dt);
-plotting(KFmu,xGaussian,'Kalman Filter');
+[KFmu,KFsigma] = kalmanFilter(yCauchy,u,H,Q,R,Cmean,dt);
+plotting(KFmu,xCauchy,'Kalman Filter');
 
-[EKFmu,~] = ExtendedkalmanFilter(yBiMod,u,H,Q,R,dt);
-plotting(EKFmu,xGaussian,'Extended Kalman Filter');
+[EKFmu,EKFsigma] = ExtendedkalmanFilter(yCauchy,u,H,Q,R,dt);
+plotting(EKFmu,xCauchy,'Extended Kalman Filter');
 
-[UKFmu,~] = UnscentedkalmanFilter(yBiMod,u,H,Q,R,dt);
-plotting(UKFmu,xGaussian,'Unscented Kalman Filter');
+[UKFmu,UKFsigma] = UnscentedkalmanFilter(yCauchy,u,H,Q,R,dt);
+plotting(UKFmu,xCauchy,'Unscented Kalman Filter');
 
 numParticles = 1e3;
 dim = 6;
-[muPF] = particleFilterCustom(yBiMod,u,numParticles,dim,Q,R,dt,H);
-plotting(muPF,xGaussian,'Particle Filter');
+%R = eye(6); Cauchy works
+[muPF] = particleFilterCustom(yCauchy,u,numParticles,dim,Q,R,dt,H);
+plotting(muPF,xCauchy,'Particle Filter');
 
-%% Plot Trajectories
-figure
-plot3(xNoNoise(1,:),xNoNoise(3,:),xNoNoise(5,:),'DisplayName','No Noise')
-hold on
-plot3(xGaussian(1,:),xGaussian(3,:),xGaussian(5,:),'DisplayName','Gaussian noise')
-plot3(xUniform(1,:),xUniform(3,:),xUniform(5,:),'DisplayName','Uniform noise')
-plot3(xExp(1,:),xExp(3,:),xExp(5,:),'DisplayName','Exponetial noise')
-plot3(xBrn(1,:),xBrn(3,:),xBrn(5,:),'DisplayName','Brownian noise')
-plot3(xCauchy(1,:),xCauchy(3,:),xCauchy(5,:),'DisplayName','Cauchy noise')
-plot3(xBiMod(1,:),xBiMod(3,:),xBiMod(5,:),'DisplayName','Bi-Model noise')
-grid on
-xlabel('X')
-ylabel('Y')
-zlabel('Z')
-legend
-title('Trajectories')
+% %% Plot Trajectories
+% figure
+% plot3(xNoNoise(1,:),xNoNoise(3,:),xNoNoise(5,:),'DisplayName','No Noise')
+% hold on
+% plot3(xGaussian(1,:),xGaussian(3,:),xGaussian(5,:),'DisplayName','Gaussian noise')
+% plot3(xUniform(1,:),xUniform(3,:),xUniform(5,:),'DisplayName','Uniform noise')
+% plot3(xExp(1,:),xExp(3,:),xExp(5,:),'DisplayName','Exponetial noise')
+% plot3(xBrn(1,:),xBrn(3,:),xBrn(5,:),'DisplayName','Brownian noise')
+% plot3(xCauchy(1,:),xCauchy(3,:),xCauchy(5,:),'DisplayName','Cauchy noise')
+% plot3(xBiMod(1,:),xBiMod(3,:),xBiMod(5,:),'DisplayName','Bi-Model noise')
+% grid on
+% xlabel('X')
+% ylabel('Y')
+% zlabel('Z')
+% legend
+% title('Trajectories')
