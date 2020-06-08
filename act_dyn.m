@@ -1,6 +1,6 @@
 % Actual Dynamics of state of system (non-linear)
 % State X = [x;xdot,y,ydot,z,zdot]
-% input U = [V (const vel);phi (rotation rate); z vel rate]
+% input U = [V (const vel);theta (rotation); z vel rate]
 function x_next = act_dyn(x,u,t,dt)
     mass = 1;
     theta = u(2);

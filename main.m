@@ -98,7 +98,7 @@ Cmean = [0;0;0;0;0;0]; % Default: Gauss, Uniform, Cauchy, Bimodal
 Q = Qgauss; % Default: Gauss
 R = Rgauss; % Default: Gauss
 
-[KFmu,~] = kalmanFilter(yGaussian,u,A,B,H,Q,R,Cmean,dt);
+[KFmu,~] = kalmanFilter(yGaussian,u,H,Q,R,Cmean,dt);
 plotting(KFmu,xGaussian,'Kalman Filter');
 
 [EKFmu,~] = ExtendedkalmanFilter(yGaussian,u,H,Q,R,dt);
