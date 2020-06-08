@@ -29,7 +29,8 @@ for i = 2:num
        [~,indx] = find(wSum>pointer,1);
        particles(:,j,i) = xPred(:,j);
    end
-   muPF(:,i) = mean(particles(:,:,i),2);
+   muPF(:,i) = sum(w.*particles(:,:,i),2);
+   %muPF(:,i) = mean(particles(:,:,i),2); <- incorrect
    waitbar(i/num,wb,'Particle Filter(This can be slow depending on settings)');
 end
 close(wb)
